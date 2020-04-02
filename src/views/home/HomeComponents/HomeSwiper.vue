@@ -1,41 +1,41 @@
 <template>
   <div class="HomeSwiper">
     <swiper>
-      <swiper-item v-for="item in spbanner" class="HomeSwiper-item">
-        <a v-bind:href="item.link">
-          <img v-bind:src="item.image" alt="">
-        </a>
+      <!--<swiper-item v-if="spbanner.length!==0" v-for="item in spbanner" class="HomeSwiper-item">-->
+        <!--<a v-bind:href="item.link">-->
+          <!--<img v-bind:src="item.image" alt="">-->
+        <!--</a>-->
+      <!--</swiper-item>-->
+      <swiper-item>
+      <a :href="spbanner[0].link">
+      <img :src="spbanner[0].image" alt="">
+      </a>
+
       </swiper-item>
-      <!--<swiper-item>-->
-      <!--<a :href="spbanner[0].link">-->
-      <!--<img :src="spbanner[0].image" alt="">-->
-      <!--</a>-->
+      <swiper-item>
+      <a :href="spbanner[0].link">
+      <img :src="spbanner[1].image" alt="">
+      </a>
 
-      <!--</swiper-item>-->
-      <!--<swiper-item>-->
-      <!--<a :href="spbanner[0].link">-->
-      <!--<img :src="spbanner[1].image" alt="">-->
-      <!--</a>-->
+      </swiper-item>
+      <swiper-item>
+      <a :href="spbanner[0].link">
+      <img :src="spbanner[2].image" alt="">
+      </a>
 
-      <!--</swiper-item>-->
-      <!--<swiper-item>-->
-      <!--<a :href="spbanner[0].link">-->
-      <!--<img :src="spbanner[2].image" alt="">-->
-      <!--</a>-->
+      </swiper-item>
+      <swiper-item>
+      <a :href="spbanner[0].link">
+      <img :src="spbanner[3].image" alt="">
+      </a>
 
-      <!--</swiper-item>-->
-      <!--<swiper-item>-->
-      <!--<a :href="spbanner[0].link">-->
-      <!--<img :src="spbanner[3].image" alt="">-->
-      <!--</a>-->
+      </swiper-item>
+      <swiper-item>
+      <a :href="spbanner[0].link">
+      <img :src="spbanner[3].image" alt="">
+      </a>
 
-      <!--</swiper-item>-->
-      <!--<swiper-item>-->
-      <!--<a :href="spbanner[0].link">-->
-      <!--<img :src="spbanner[3].image" alt="">-->
-      <!--</a>-->
-
-      <!--</swiper-item>-->
+      </swiper-item>
     </swiper>
   </div>
 </template>
@@ -56,34 +56,25 @@
 
       }
     },
+    created(){
+      console.log(this.spbanner)
+      console.log(this.spbanner.length)
+
+    },
     components:{
       Swiper,
       SwiperItem
     },
 
   }
-  // import {Swiper, SwiperItem} from 'components/common/swiper'
-  // export default {
-  //   name: "HomeSwiper",
-  //   props: {
-  //     spbanner: {
-  //       type: Array,
-  //       default() {
-  //         return []
-  //       }
-  //     }
-  //   },
-  //   components: {
-  //     Swiper,
-  //     SwiperItem
-  //   }
-  // }
+
 </script>
 
 <style scoped>
 .HomeSwiper{
   padding: 5px 0 0;
   top: 0;
+
 }
 .HomeSwiper-item img{
     width: 375px ;

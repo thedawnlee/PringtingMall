@@ -1,44 +1,96 @@
 <template>
-  <div id="home">
+  <div id="home" class="wrapper">
     <NavBar class="home-nav">
       <div slot="center">首页</div>
     </NavBar>
-    <home-swiper :spbanner="banners"></home-swiper>
-    <recommend-view v-bind:recommends="recommends"></recommend-view>
-  </div>
-</template>
+       <scroll class="content" ref="scroll"
+               @scrollEvent="scrollEvent"
+               @pullingUpLoadData="pullingUpLoadData"
+              >
+         <home-swiper :spbanner="banners"></home-swiper>
+         <recommend-view v-bind:recommends="recommends"></recommend-view>
+         <h3>优质店铺</h3>
+         <special-view v-bind:qualityStore="recommends"></special-view>
+         <tab-side-bar :titles="featureList" class="TabSideBarSet"
+                       @TabSideBarClick="TabSideBarItemClick"></tab-side-bar>
+         <!--<div v-if="finalPrintProduct===[]">-->
+         <!--<print-product-show  :printProduct="printGoods['pop'].list"></print-product-show>-->
+         <!--</div>-->
 
+         <print-product-show :printProduct="printGoods[finalType].list"></print-product-show>
+       </scroll>
+    <back-top v-if="isShowBackTop" @click.native="backToTop"></back-top>
+    <!--<ul>-->
+      <!--<li>11</li>-->
+      <!--<li>12</li>-->
+      <!--<li>13</li>-->
+      <!--<li>14</li>-->
+      <!--<li>15</li>-->
+      <!--<li>16</li>-->
+      <!--<li>17</li>-->
+      <!--<li>18</li>-->
+      <!--<li>19</li>-->
+      <!--<li>110</li>-->
+    <!--</ul>-->
+      </div>
+</template>
 <script>
   import NavBar from 'components/common/navbar/NavBar'
-  import {getMultidata,
-  getWgData} from "../../network/home";
+  import
+  {
+    getMultidata,
+  getWgData,
+  getPrintProductData} from "../../network/home";
   import HomeSwiper from './HomeComponents/HomeSwiper'
   import RecommendView from './HomeComponents/RecommendView'
+  import SpecialView from './HomeComponents/SpecialView'
+  import TabSideBar from 'components/content/TabSideBar/TabSideBar'
+  import PrintProductShow from 'components/content/PrintProduct/PrintProductShow'
+  import Scroll from 'components/common/scroll/Scroll'
+  import BackTop from 'components/content/backTop/BackTop'
   export default {
     name: "Home",
     components:{
       NavBar,
       HomeSwiper,
-      RecommendView
+      RecommendView,
+      SpecialView,
+      TabSideBar,
+      PrintProductShow,
+      Scroll,
+      BackTop
     },
     data(){
       return {
         banners:[],
         recommends:[],
-        spbanner:[]
+        spbanner:[],
+        printGoods:{
+          'pop':{
+            page:0,
+            list:[]
+          },'new':{
+            page:0,
+            list:[]
+          },
+          'sell':{
+            page:0,
+            list:[]
+          }
+        },
+        finalPrintProduct:[],
+        featureList:['考试资料','英文作文','精选'],
+        finalType:'pop',
+        scroll:null,
+        isShowBackTop:false
 
 
       }
     },
+
     created(){
       //1.请求数据
-      getMultidata().then(res=>{
-        this.banners = res.data.banner.list
-        console.log('banner的长度'+res.data.banner.list.length)
-        this.recommends = res.data.recommend.list
-        // console.log(this.recommends)
 
-      })
       // getWgData().then(res=>{
       //   // console.log(res.data.data.banner)
       //   // this.spbanner=res.data.data.banner
@@ -46,15 +98,98 @@
       //   this.spbanner=res.data.data.banner
       // })
 
+      this.getHomeData()
+      this.getPrintProductData('pop')
+      this.getPrintProductData('new')
+      this.getPrintProductData('sell')
+
+
+
+
+    },
+    mounted(){
+      //监听图片加载
+
+      const refresh = this.debounce(this.$refs.scroll.refresh,20)
+      this.$bus.$on('imgLoad',()=>{
+        refresh()
+
+      })
+    },
+    methods:{
+      //防抖动函数
+      debounce(func,delay){
+
+        let timer = null
+        return function (...args) {
+          if (timer)clearTimeout()
+          timer = setTimeout(()=>{
+            func.apply(this, args)
+          },delay)
+        }
+
+      },
+      //上拉请求数据
+      pullingUpLoadData(){
+        this.getPrintProductData(this.finalType)
+        console.log('在下拉啦！')
+      },
+      //backtop按钮何时出现
+      scrollEvent(position){
+          this.isShowBackTop = (position.y)<-1000
+      },
+
+      //点击事件
+      TabSideBarItemClick(item){
+        console.log("TabBar点击事件触发")
+        console.log(item)
+        const index = parseInt(item)
+        if (this.featureList[item]==='考试资料') {
+            this.finalType='pop'
+        }
+        else if (this.featureList[item]==='英文作文'){
+          this.finalType='new'
+        }
+        else {
+          this.finalType='sell'
+        }
+      },
+      //network request
+      getHomeData(){
+        getMultidata().then(res=>{
+          this.banners = res.data.banner.list
+          // console.log('banner的长度'+res.data.banner.list.length)
+          // console.log(res.data.banner.list[1].image);
+          this.recommends = res.data.recommend.list
+          // console.log(this.recommends)
+
+        })
+      },
+      getPrintProductData(type){
+        const page = this.printGoods[type].page+1
+        getPrintProductData(type,page).then(res=>{
+          this.printGoods[type].list.push(...res.data.list)
+          this.printGoods[type].page+=1
+          this.$refs.scroll.scroll&&this.$refs.scroll.scroll.refresh()
+          this.$refs.scroll.scroll&&this.$refs.scroll.scroll.finishPullUp()
+        },error => {
+          console.log(error)
+        })
+      },
+      backToTop(){
+        this.$refs.scroll.backTop(0,0,500)
+      }
+
     }
   }
 </script>
 
 <style scoped>
   #home {
-    /*padding-top: 44px;*/
-    height: 100px;
-    position: relative;
+    padding-top: -1px;
+    /*height: 100px;*/
+    /*position: relative;*/
+    height:100vh;
   }
   .home-nav {
     background-color: var(--color-tint);
@@ -65,5 +200,33 @@
     top: 0;
     z-index: 9;
   }
+  .TabSideBarSet{
+
+    position: sticky;
+    top: 44px;
+    z-index:9
+
+  }
+
+.content{
+  height: calc(100% - 43px);
+overflow: hidden;
+  margin-top: 44px;
+
+}
+.wrapper{
+  margin-top: -33px;
+
+}
+
+/*.content{*/
+
+  /*position:absolute;*/
+  /*top: 44px;*/
+  /*left: 0;*/
+  /*right: 0;*/
+  /*overflow: hidden;*/
+  /*bottom: 44px;*/
+/*}*/
 
 </style>

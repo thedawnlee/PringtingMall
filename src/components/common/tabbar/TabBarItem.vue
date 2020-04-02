@@ -32,15 +32,15 @@
 
     },
     computed:{
+      //计算属性：检查当前路由是否处于活跃状态
       isActive(){
         return this.$route.path.indexOf(this.link)
       },
+      //如果处于活跃状态那么转换文字颜色
       activeStyle(){
-        console.log(this.isActive+'isactive')
+
         return this.isActive?{}:{color:this.activeColor}
       }
-
-
     },
 
     methods:{
