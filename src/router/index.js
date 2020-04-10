@@ -38,6 +38,13 @@ const routes = [
     meta:{
       title:'Profile'
     }
+  },
+  {
+    path:'/detail/:id',
+    component:()=>import('views/productDetail/productDetail'),
+    meta:{
+      title:'Detail'
+    }
   }
 ]
 const router = new VueRouter({
@@ -48,9 +55,9 @@ const router = new VueRouter({
 })
 
 
-router.beforeEach((to,from,next)=>{
-  document.title=to.matched[0].meta.title
-  next()
-
-})
+// router.beforeEach((to,from,next)=>{
+//   document.title=to.matched[0].meta.title
+//   next()
+//
+// })
 export default router

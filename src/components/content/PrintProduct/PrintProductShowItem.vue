@@ -1,5 +1,5 @@
 <template>
-  <div class="product-item">
+  <div class="product-item" @click="productItemClick">
     <img :src="product.show.img" alt="" @load="imgload">
    <div class="product-info">
      <p>{{product.title}}</p>
@@ -12,6 +12,11 @@
 <script>
   export default {
     name: "PrintProductShowItem",
+    data(){
+      return {
+        id:undefined
+      }
+    },
     props:{
       product:{
         type:Object,
@@ -23,6 +28,16 @@
     methods:{
       imgload(){
         this.$bus.$emit('imgLoad')
+      },
+
+        productItemClick(){
+          console.log(this.product.iid);
+          this.id=this.product.iid
+
+          console.log('123')
+          this.$router.push('/detail/'+this.id)
+
+
       }
     }
   }

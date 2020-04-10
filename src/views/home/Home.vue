@@ -3,16 +3,21 @@
     <NavBar class="home-nav">
       <div slot="center">首页</div>
     </NavBar>
+    <!--
+    滚动时保存tabsidebar
+    -->
+    <tab-side-bar :titles="featureList" class="ScrollTabsidebar"
+                  @TabSideBarClick="TabSideBarItemClick" ref="tabSideBar" v-if="isShowTopSideBar" ></tab-side-bar>
        <scroll class="content" ref="scroll"
                @scrollEvent="scrollEvent"
                @pullingUpLoadData="pullingUpLoadData"
               >
-         <home-swiper :spbanner="banners"></home-swiper>
+         <home-swiper :spbanner="banners" @SwiperImgLoadComplete="SwiperImgLoadComplete"></home-swiper>
          <recommend-view v-bind:recommends="recommends"></recommend-view>
          <h3>优质店铺</h3>
          <special-view v-bind:qualityStore="recommends"></special-view>
          <tab-side-bar :titles="featureList" class="TabSideBarSet"
-                       @TabSideBarClick="TabSideBarItemClick"></tab-side-bar>
+                       @TabSideBarClick="TabSideBarItemClick" ref="tabSideBar"></tab-side-bar>
          <!--<div v-if="finalPrintProduct===[]">-->
          <!--<print-product-show  :printProduct="printGoods['pop'].list"></print-product-show>-->
          <!--</div>-->
@@ -82,7 +87,9 @@
         featureList:['考试资料','英文作文','精选'],
         finalType:'pop',
         scroll:null,
-        isShowBackTop:false
+        isShowBackTop:false,
+        isShowTopSideBar:false,
+        offsetTop:0
 
 
       }
@@ -110,19 +117,24 @@
     mounted(){
       //监听图片加载
 
-      const refresh = this.debounce(this.$refs.scroll.refresh,20)
+      const refresh = this.debounce(this.$refs.scroll.refresh,200)
       this.$bus.$on('imgLoad',()=>{
         refresh()
 
       })
     },
     methods:{
+      //图片加载完成事件
+      SwiperImgLoadComplete(){
+        console.log(this.$refs.tabSideBar.$el.offsetTop);
+        this.offsetTop = this.$refs.tabSideBar.$el.offsetTop
+      },
       //防抖动函数
       debounce(func,delay){
-
         let timer = null
         return function (...args) {
-          if (timer)clearTimeout()
+          if (timer)
+          {clearTimeout()}
           timer = setTimeout(()=>{
             func.apply(this, args)
           },delay)
@@ -136,9 +148,10 @@
       },
       //backtop按钮何时出现
       scrollEvent(position){
-          this.isShowBackTop = (position.y)<-1000
-      },
+          this.isShowBackTop = (position.y)<-1000;
+          this.isShowTopSideBar=(position.y)<-this.offsetTop
 
+      },
       //点击事件
       TabSideBarItemClick(item){
         console.log("TabBar点击事件触发")
@@ -228,5 +241,9 @@ overflow: hidden;
   /*overflow: hidden;*/
   /*bottom: 44px;*/
 /*}*/
-
+.ScrollTabsidebar{
+  position: relative;
+  z-index: 9;
+  margin-top: 77px;
+}
 </style>

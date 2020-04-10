@@ -1,6 +1,9 @@
 <template>
   <div class="product-show">
-    <print-product-show-item v-for="item in printProduct" :product="item"></print-product-show-item>
+    <print-product-show-item v-for="item in printProduct"
+                             :product="item"
+
+    ></print-product-show-item>
   </div>
 </template>
 
@@ -18,7 +21,8 @@
     },
     components:{
       PrintProductShowItem
-    }
+    },
+
 
   }
 </script>

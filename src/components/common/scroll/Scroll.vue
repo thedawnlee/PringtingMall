@@ -41,7 +41,7 @@
         this.scroll&&this.scroll.scrollTo(x,y,time)
       },
       refresh(){
-        this.scroll.refresh()
+        this.scroll.refresh();
         console.log('加载图片');
       }
 

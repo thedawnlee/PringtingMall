@@ -7,8 +7,8 @@
         <!--</a>-->
       <!--</swiper-item>-->
       <swiper-item>
-      <a :href="spbanner[0].link">
-      <img :src="spbanner[0].image" alt="">
+      <a :href="spbanner[0].link" v-if="spbanner[0].link">
+      <img :src="spbanner[0].image" alt="" @load="SwiperImgLoadComplete">
       </a>
 
       </swiper-item>
@@ -65,6 +65,11 @@
       Swiper,
       SwiperItem
     },
+    methods:{
+      SwiperImgLoadComplete(){
+        this.$emit('SwiperImgLoadComplete')
+      }
+    }
 
   }
 
