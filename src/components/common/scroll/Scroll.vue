@@ -37,6 +37,13 @@
 
     },
     methods:{
+      scrollTo(x,y,time){
+        console.log('scrollto');
+
+        console.log(y);
+
+        this.scroll && this.scrollTo && this.scroll.scrollTo(x,y,time)
+      },
       backTop(x,y,time){
         this.scroll&&this.scroll.scrollTo(x,y,time)
       },

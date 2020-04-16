@@ -11,39 +11,52 @@
         >{{item}}</span>
       </div>
     </nav-bar>
-    <scroll class="content">
-      <product-detail-swiper :topImages="topImages"></product-detail-swiper>
-      <product-detail-base-info :goods="productDetail"></product-detail-base-info>
-      <product-detail-shop :shop="shopInfo"></product-detail-shop>
-      <ul>
-        <li>{11}</li>
-        <li>{21}</li>
-        <li>{31}</li>
-        <li>{41}</li>
-        <li>{51}</li>
-        <li>{61}</li>
-        <li>{71}</li>
-        <li>{81}</li>
-        <li>{91}</li>
-        <li>{101}</li>
-        <li>{111}</li>
-        <li>{121}</li>
-        <li>{131}</li>
-
-      </ul>
+    <scroll class="content" ref="scroll"
+            @scrollEvent="scrollEvent">
+      <product-detail-swiper :topImages="topImages"
+      ref="swiperproduct"></product-detail-swiper>
+      <product-detail-base-info :goods="productDetail"
+      ref="baseinfo"></product-detail-base-info>
+      <product-detail-shop :shop="shopInfo"
+      ref="detailshop"></product-detail-shop>
+      <product-detail-info :detail-info="productDetail"
+                           :detailInfoZero="productDetailInfoZero"
+                           :productDetailInfoImg="productDetailInfoImg"
+                           @imageLoad="imgLoad"
+                           ref="detailinfo"
+      ></product-detail-info>
+      <product-detail-param-info :param-info="productDetailParamInfo"
+      ref="detailparam"></product-detail-param-info>
+    <product-detail-comments :commentInfo="productDetailCommentInfo"
+    ref="comments"></product-detail-comments>
+      <print-product-show :printProduct="recommendData"
+      ref="recommends"></print-product-show>
     </scroll>
+
+    <back-top v-if="isShowBackTop" @click.native="backToTop"></back-top>
+    <product-detail-buttom-bar @addToCart="addToCart"></product-detail-buttom-bar>
   </div>
 </template>
-
 <script>
   import NavBar from 'components/common/navbar/NavBar'
   import {getProductDetail,
     NewproductDetail,
-  Shop} from "../../network/productDetail"
+  Shop,
+  GoodsParam,
+  getRecommendsData} from "../../network/productDetail"
   import productDetailSwiper from './ChildComponents/productDetailSwiper'
   import productDetailBaseInfo from './ChildComponents/productDetailBaseInfo'
   import Scroll from 'components/common/scroll/Scroll'
   import productDetailShop from './ChildComponents/productDetailShop'
+  import productDetailInfo from './ChildComponents/productDetailInfo'
+  import productDetailParamInfo from './ChildComponents/productDetailParamInfo'
+  import productDetailComments from './ChildComponents/productDetailComments'
+  import PrintProductShow from 'components/content/PrintProduct/PrintProductShow'
+  import {debounce} from "../../common/utils";
+  import {itemListenerMixin,showBackTop} from "../../common/mixin";
+  import BackTop from 'components/content/backTop/BackTop'
+  import productDetailButtomBar from './ChildComponents/productDetailButtomBar'
+
   export default {
     name: "productDetail",
     components:{
@@ -51,41 +64,121 @@
       productDetailSwiper,
       productDetailBaseInfo,
       Scroll,
-      productDetailShop
+      productDetailShop,
+      productDetailInfo,
+      productDetailParamInfo,
+      productDetailComments,
+      PrintProductShow,
+      BackTop,
+      productDetailButtomBar
     },
 
     data(){
       return {
         productid:undefined,
-        ItemList:['商品','详情','参数','评论'],
+        ItemList:['商品','参数','评论','推荐'],
         currentIndex:0,
         topImages:[],
         productDetail:{},
         shopInfo:{},
+        productDetailInfo:{},
+        productDetailInfoZero:{},
+        productDetailInfoImg:{},
+        productDetailParamInfo:{},
+        productDetailCommentInfo:{},
+        recommendData:[],
+        imgcomplate:null,
+        themeTopY:[],
+        finalPrice:0
+
       }
+    },
+    mixins:[showBackTop],
+    // mixins:[itemListenerMixin],
+    mounted(){
+
+
+      const refresh = this.debounce(this.$refs.scroll.refresh,200)
+      this.imgcomplate = ()=>{
+        refresh()
+      }
+
+      this.$bus.$on('imgLoad',this.imgcomplate)
+      // console.log('使用混入来加载mounted');
+    },
+    destroyed(){
+      console.log('取消监听imgload');
+      this.$bus.$off('imgLoad',this.imgcomplate)
+
+    },
+    updated(){
+      this.themeTopY = []
+      this.themeTopY.push(0)
+      this.themeTopY.push(this.$refs.baseinfo.$el.offsetTop)
+      this.themeTopY.push(this.$refs.comments.$el.offsetTop)
+      this.themeTopY.push(this.$refs.recommends.$el.offsetTop)
     },
     created(){
         this.productid =this.$route.params.id
         getProductDetail(this.productid).then(res=>{
-          console.log(res)
+
           const data = res.result
           this.topImages=res.result.itemInfo.topImages
 
           this.productDetail = new NewproductDetail(data.itemInfo,data.columns,data.shopInfo.services)
+          this.finalPrice = data.itemInfo.lowNowPrice
             this.shopInfo = new Shop(data.shopInfo);
-
+          this.productDetailInfo = data.detailInfo
+          this.productDetailInfoZero = data.detailInfo[0]
+          this.productDetailInfoImg = data.detailInfo.detailImage[0]
+          this.productDetailParamInfo  = new GoodsParam(data.itemParams.info,data.itemParams.rule)
+          this.productDetailCommentInfo = data.rate.list[0]
         },
         error => {
           console.log(error)
         })
+      getRecommendsData().then(res=>{
+       this.recommendData =  res.data.list
+
+        },
+      error => {
+        console.log('Error');
+      })
 
     },
     methods:{
+      addToCart(){
+        const product = {}
+        product.iid=this.productid
+        product.image = this.topImages[0]
+        // product.desc = this.productDetail.desc
+        product.title = this.productDetail.title
+        product.price = this.finalPrice
+
+
+        // this.$store.dispatch('addCart',product)
+        this.$store.dispatch('addCart',product)
+      },
+      requestDetail(iid){
+        this.$bus.$on('requestDetail',()=>{
+          this.$router.push('/detail/'+iid)
+        })
+      },
+      debounce,
+      scrollEvent(position){
+        this.isShowBackTop = (position.y)<-1000;
+      },
       ItemClick(index){
         this.currentIndex=index
+        this.$refs.scroll.scroll.scrollTo(0,-this.themeTopY[index],500)
+
       },
       backtoHome(){
         this.$router.back()
+      },
+        imgLoad(){
+        console.log('刷新高度')
+        this.$refs.scroll.scroll.refresh()
       }
     }
   }

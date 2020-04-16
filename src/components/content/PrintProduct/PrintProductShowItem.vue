@@ -1,6 +1,7 @@
 <template>
-  <div class="product-item" @click="productItemClick">
-    <img :src="product.show.img" alt="" @load="imgload">
+  <div class="product-item" @click="productItemClick"
+  >
+    <img :src="getImg" alt="" @load="imgload">
    <div class="product-info">
      <p>{{product.title}}</p>
      <span class="product-price">{{product.price}}</span>
@@ -17,6 +18,11 @@
         id:undefined
       }
     },
+    computed:{
+      getImg(){
+        return this.product.image||this.product.show.img
+      }
+    },
     props:{
       product:{
         type:Object,
@@ -31,12 +37,13 @@
       },
 
         productItemClick(){
-          console.log(this.product.iid);
-          this.id=this.product.iid
 
+          this.id=this.product.iid||this.product.shop_id
+          console.log(this.id);
           console.log('123')
-          this.$router.push('/detail/'+this.id)
 
+          this.$bus.$emit('requestDetail',this.id)
+          this.$router.push('/detail/'+this.id)
 
       }
     }

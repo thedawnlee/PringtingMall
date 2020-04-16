@@ -47,15 +47,15 @@
       }
     },
     created(){
-      console.log('进入商品展示')
-      console.log(this.topImages)
-      console.log(this.topImages.length)
-      console.log(this.topImages[0])
-      console.log(this.topImages[1])
-      console.log(this.topImages[2])
-      console.log(this.topImages[3])
-      console.log(this.topImages[4])
-      console.log(this.topImages[5])
+      // console.log('进入商品展示')
+      // console.log(this.topImages)
+      // console.log(this.topImages.length)
+      // console.log(this.topImages[0])
+      // console.log(this.topImages[1])
+      // console.log(this.topImages[2])
+      // console.log(this.topImages[3])
+      // console.log(this.topImages[4])
+      // console.log(this.topImages[5])
     },
     components:{
       Swiper,

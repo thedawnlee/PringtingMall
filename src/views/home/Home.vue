@@ -6,8 +6,11 @@
     <!--
     滚动时保存tabsidebar
     -->
-    <tab-side-bar :titles="featureList" class="ScrollTabsidebar"
-                  @TabSideBarClick="TabSideBarItemClick" ref="tabSideBar" v-if="isShowTopSideBar" ></tab-side-bar>
+    <tab-side-bar :titles="featureList"
+                  class="ScrollTabsidebar"
+                  @TabSideBarClick="TabSideBarItemClick"
+                  ref="topTabSideBar"
+                  v-show="isShowTopSideBar" ></tab-side-bar>
        <scroll class="content" ref="scroll"
                @scrollEvent="scrollEvent"
                @pullingUpLoadData="pullingUpLoadData"
@@ -16,8 +19,10 @@
          <recommend-view v-bind:recommends="recommends"></recommend-view>
          <h3>优质店铺</h3>
          <special-view v-bind:qualityStore="recommends"></special-view>
-         <tab-side-bar :titles="featureList" class="TabSideBarSet"
-                       @TabSideBarClick="TabSideBarItemClick" ref="tabSideBar"></tab-side-bar>
+         <tab-side-bar :titles="featureList"
+                       class="TabSideBarSet"
+                       @TabSideBarClick="TabSideBarItemClick"
+                       ref="tabSideBar"></tab-side-bar>
          <!--<div v-if="finalPrintProduct===[]">-->
          <!--<print-product-show  :printProduct="printGoods['pop'].list"></print-product-show>-->
          <!--</div>-->
@@ -53,6 +58,10 @@
   import PrintProductShow from 'components/content/PrintProduct/PrintProductShow'
   import Scroll from 'components/common/scroll/Scroll'
   import BackTop from 'components/content/backTop/BackTop'
+  import {
+    itemListenerMixin
+  } from "../../common/mixin";
+
   export default {
     name: "Home",
     components:{
@@ -65,6 +74,9 @@
       Scroll,
       BackTop
     },
+    // mixins:[
+    //   itemListenerMixin
+    // ],
     data(){
       return {
         banners:[],
@@ -89,7 +101,9 @@
         scroll:null,
         isShowBackTop:false,
         isShowTopSideBar:false,
-        offsetTop:0
+        offsetTop:0,
+        settingY:0,
+        complateImg:null
 
 
       }
@@ -109,24 +123,38 @@
       this.getPrintProductData('pop')
       this.getPrintProductData('new')
       this.getPrintProductData('sell')
-
-
+      console.log('创建home');
 
 
     },
     mounted(){
-      //监听图片加载
+      console.log(this.$route.path)
+      // 监听图片加载
 
       const refresh = this.debounce(this.$refs.scroll.refresh,200)
-      this.$bus.$on('imgLoad',()=>{
+      this.complateImg = ()=>{
         refresh()
 
-      })
+      }
+      this.$bus.$on('imgLoad',this.complateImg)
+      // console.log('使用混入来加载内容');
+    },
+    deactivated(){
+      this.settingY = this.$refs.scroll.scroll.y
+      console.log(this.settingY);
+      console.log('leaving home 取消监听')
+      this.$bus.$off('imgLoad',this.complateImg)
+    },
+    activated(){
+      // this.$refs.scroll._scroll.scrollTo(0,this.settingY,0)
+      console.log('active');
+      console.log(this.settingY)
+      this.$refs.scroll.scrollTo(0,this.settingY,500)
+      console.log('函数已经执行');
     },
     methods:{
       //图片加载完成事件
       SwiperImgLoadComplete(){
-        console.log(this.$refs.tabSideBar.$el.offsetTop);
         this.offsetTop = this.$refs.tabSideBar.$el.offsetTop
       },
       //防抖动函数
@@ -166,6 +194,14 @@
         else {
           this.finalType='sell'
         }
+        console.log('========')
+        console.log(this.$refs.topTabSideBar);
+        console.log(this.$refs.tabSideBar);
+
+        console.log('========')
+        this.$refs.topTabSideBar.currentIndex = index
+        this.$refs.tabSideBar.currentIndex = index
+
       },
       //network request
       getHomeData(){

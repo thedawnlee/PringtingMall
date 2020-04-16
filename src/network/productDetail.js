@@ -9,7 +9,12 @@ export function getProductDetail(iid) {
   })
 
 }
+export function getRecommendsData() {
 
+  return request({
+    url: '/api/h8/recommend'
+  })
+}
 export class NewproductDetail{
   constructor(itemInfo,columns,services){
     this.title = itemInfo.title

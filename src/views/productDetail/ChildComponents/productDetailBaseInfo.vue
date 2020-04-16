@@ -35,13 +35,10 @@
     methods:{
 
     },
-    created(){
-console.log("============")
-      setTimeout(()=>{
-        console.log(this.goods.colunms[0]);
-      },5000)
-
-    }
+    // created(){
+    //   setTimeout(()=>{
+    //   },5000)
+    // }
   }
 </script>
 
