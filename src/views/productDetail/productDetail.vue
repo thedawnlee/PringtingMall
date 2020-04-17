@@ -32,9 +32,11 @@
       <print-product-show :printProduct="recommendData"
       ref="recommends"></print-product-show>
     </scroll>
-
-    <back-top v-if="isShowBackTop" @click.native="backToTop"></back-top>
     <product-detail-buttom-bar @addToCart="addToCart"></product-detail-buttom-bar>
+    <back-top v-if="isShowBackTop" @click.native="backToTop"></back-top>
+
+
+    <toast :msg="msg" :isShow="show"></toast>
   </div>
 </template>
 <script>
@@ -56,7 +58,7 @@
   import {itemListenerMixin,showBackTop} from "../../common/mixin";
   import BackTop from 'components/content/backTop/BackTop'
   import productDetailButtomBar from './ChildComponents/productDetailButtomBar'
-
+  import Toast from 'components/common/toast/Toast'
   export default {
     name: "productDetail",
     components:{
@@ -70,7 +72,9 @@
       productDetailComments,
       PrintProductShow,
       BackTop,
-      productDetailButtomBar
+      productDetailButtomBar,
+      Toast,
+
     },
 
     data(){
@@ -89,7 +93,9 @@
         recommendData:[],
         imgcomplate:null,
         themeTopY:[],
-        finalPrice:0
+        finalPrice:0,
+        msg:'',
+        show:false
 
       }
     },
@@ -157,7 +163,15 @@
 
 
         // this.$store.dispatch('addCart',product)
-        this.$store.dispatch('addCart',product)
+        this.$store.dispatch('addCart',product).then(res=>{
+          console.log(res)
+          this.show=true
+          this.msg=res
+          setTimeout(()=>{
+            this.show=false
+            this.msg=''
+          },1500)
+        })
       },
       requestDetail(iid){
         this.$bus.$on('requestDetail',()=>{
